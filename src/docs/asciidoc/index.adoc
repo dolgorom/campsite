@@ -1,0 +1,28 @@
+= Campsite booking service REST Docs
+
+This is an example output for a service running at http://localhost:8080:
+
+
+== GET list of all available time spots
+.request
+include::{snippets}/testAvailableSlots/http-request.adoc[]
+
+.response
+include::{snippets}/testAvailableSlots/http-response.adoc[]
+
+== GET list of all available time spots for specific dates
+.request
+include::{snippets}/testAvailableSlotsForDates/http-request.adoc[]
+
+.response
+include::{snippets}/testAvailableSlotsForDates/http-response.adoc[]
+
+
+== POST make reservation
+.request
+include::{snippets}/testMakeReservation/http-request.adoc[]
+
+.response
+include::{snippets}/testMakeReservation/http-response.adoc[]
+
+

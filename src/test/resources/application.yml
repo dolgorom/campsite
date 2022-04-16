@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: CampsiteReservation
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    spring.datasource.url: jdbc:h2:mem:bootapp;DB_CLOSE_DELAY=-1
+    spring.datasource.username: sa
+    spring.datasource.password:
+  h2:
+    console.enabled: true
+  jpa:
+    hibernate:
+        hbm2ddl:
+            auto: create
+    
+
