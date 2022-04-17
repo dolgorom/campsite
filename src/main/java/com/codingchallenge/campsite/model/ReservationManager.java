@@ -3,6 +3,7 @@ package com.codingchallenge.campsite.model;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.codingchallenge.campsite.repositories.PersonRepository;
 import com.codingchallenge.campsite.repositories.ReservationRepository;
+import com.codingchallenge.campsite.repositories.SlotRepository;
 import com.codingchallenge.campsite.rest.exceptions.IllegalRequestException;
 import com.codingchallenge.campsite.tools.DateTools;
 
@@ -27,6 +29,9 @@ public class ReservationManager {
 	
 	@Autowired
 	private PersonRepository personRepo;
+	
+	@Autowired
+	private SlotRepository slotRepo;
 	
 	
 	public Set<LocalDate> getListOfAvailableDates(LocalDate startDate, LocalDate endDate){
@@ -46,11 +51,22 @@ public class ReservationManager {
 		return allDates;
 	}
 	
+	public Set<LocalDate> getListOfTakenDates(LocalDate startDate, LocalDate endDate){
+		
+				
+		Collection<Slot> slots = slotRepo.findReservationsBetween(startDate, endDate);	
+		
+		Set<LocalDate> result = slots.stream().map(s -> s.getDate()).collect(Collectors.toSet());
+										
+		return result;
+	}
+	
 	private boolean validateReservationDates(LocalDate startDate, LocalDate endDate){
 		
 		Set<LocalDate> requiredDates = DateTools.createDatePeriod(startDate, endDate);
 				
 		Set<LocalDate> allDates = getListOfAvailableDates(startDate, endDate);
+		
 		
 		return allDates.containsAll(requiredDates);
 		
@@ -60,8 +76,16 @@ public class ReservationManager {
 		
 		if (validateReservationDates(reservation.getArrival(), reservation.getDeparture())) {
 			
+			Set<LocalDate> requiredDates = DateTools.createDatePeriod(reservation.getArrival(), reservation.getDeparture());
 			
-
+			Set<Slot> slots = new HashSet<>();
+			for (LocalDate localDate: requiredDates) {
+				 Slot slot = new Slot(localDate.toEpochDay(),  localDate, reservation);
+				 slots.add(slot);
+			}
+			
+			slotRepo.saveAll(slots);
+			
 			return reservationsRepo.save(reservation);
 			
 		} else {

@@ -52,6 +52,11 @@ public class Slot {
 	public void setReservation(Reservation reservation) {
 		this.reservation = reservation;
 	}
+
+	@Override
+	public String toString() {
+		return "Slot [id=" + id + ", date=" + date + ", reservation=" + reservation + "]";
+	}
 	
 	
 	
