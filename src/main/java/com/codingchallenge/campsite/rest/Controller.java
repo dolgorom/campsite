@@ -1,7 +1,6 @@
 package com.codingchallenge.campsite.rest;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,22 +36,24 @@ public class Controller {
 	
 	@Autowired
 	private ReservationManager reservationManager;
-	   
-	
+	   	
 	
 	@GetMapping("/available-slots")
-    public Set<LocalDate> findAllAvailableSlots() {
-		log.debug("findavailableSlots");
+    public ResponseEntity<Set<LocalDate>> findAllAvailableSlots() {
+		log.info("findavailableSlots");
+		
+		//by default the period is set to one month, one day from now
 		LocalDate startDate = LocalDate.now().plusDays(1);
 		LocalDate endDate = startDate.plusMonths(1);
 		
-		return reservationManager.getListOfAvailableDates(startDate, endDate);
+		return new ResponseEntity<Set<LocalDate>>(reservationManager.getListOfAvailableDates(startDate, endDate), HttpStatus.OK);
     }
 	
 	@GetMapping("/available-slots/start/{arrival}/end/{departure}")
 	public ResponseEntity<Set<LocalDate>> findAllAvailableSlotsForDates(@PathVariable String arrival,
 			@PathVariable String departure) {
-		log.info("findavailableSlots");
+		
+		log.info("findavailableSlots for dates between {} and {}", arrival, departure);
 		
 		LocalDate startDate;
 		LocalDate endDate;
@@ -72,9 +73,10 @@ public class Controller {
 		return new ResponseEntity<Set<LocalDate>>(reservationManager.getListOfAvailableDates(startDate, endDate), HttpStatus.OK);
 	}
 	
+	
 	@GetMapping("/cancel-reservation/{id}")
 	public ResponseEntity<Reservation> findAllAvailableSlotsForDates(@PathVariable UUID id) {
-		log.info("cancel reservation");
+		log.info("cancel reservation called for {}", id);
 
 		Reservation reservation = reservationsRepo.findById(id);
 
@@ -118,22 +120,21 @@ public class Controller {
 		person = reservationManager.createPerson(person);
 		reservation.setPerson(person);
 		
-		return new ResponseEntity<Reservation>( reservationManager.createReservation(reservation), HttpStatus.CREATED);
+		return new ResponseEntity<Reservation>( reservationManager.createOrUpdateReservation(reservation), HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/modify-reservation")
 	public ResponseEntity<Reservation> modifyReservation(@RequestBody ModificationRequest modificationRequest) {
 
-		log.info("makeReservation called {} ", modificationRequest);
+		log.info("modifyReservation called {} ", modificationRequest);
 
 		if (!modificationRequest.validate()) {
 			throw new IncompleteRequestException(
 					"Request must provide reservation id and new  arrival date and departure date. Ex. {\"reservationId\":\"2aaa2c46-89bd-4ce8-8a5c-53dd8a90e678\",\"newArrival\":\"2022-04-17\",\"newDeparture\":\"2022-04-18\"}");
 		}
-		
-
 
 		Reservation modifiedReservation;
+		
 		try {
 			modifiedReservation = modificationRequest.parseFromReservationRequest();			
 
@@ -151,7 +152,7 @@ public class Controller {
 		reservationToBeUpdated.setDeparture(modifiedReservation.getDeparture());
 
 		
-		return new ResponseEntity<Reservation>( reservationManager.createReservation(reservationToBeUpdated), HttpStatus.OK);
+		return new ResponseEntity<Reservation>( reservationManager.createOrUpdateReservation(reservationToBeUpdated), HttpStatus.OK);
 	}
 	
 	

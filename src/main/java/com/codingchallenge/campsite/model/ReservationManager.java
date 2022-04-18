@@ -54,7 +54,7 @@ public class ReservationManager {
 		
 	}
 	
-	public synchronized Reservation  createReservation(Reservation reservation) throws IllegalRequestException{
+	public synchronized Reservation  createOrUpdateReservation(Reservation reservation) throws IllegalRequestException{
 		
 		if (validateReservationDates(reservation.getArrival(), reservation.getDeparture())) {
 			

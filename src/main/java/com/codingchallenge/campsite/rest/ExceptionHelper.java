@@ -60,7 +60,7 @@ public class ExceptionHelper {
 	   
 	    	   log.error("Invalid Input Exception: ",ex.getMessage());
 	   
-	           return new ResponseEntity<Object>(ex.getMessage(),HttpStatus.NOT_FOUND);
+	           return new ResponseEntity<Object>(ex.getMessage(),HttpStatus.BAD_REQUEST);
 	   
 	       }	
 	       
