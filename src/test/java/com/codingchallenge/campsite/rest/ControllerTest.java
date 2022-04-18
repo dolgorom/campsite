@@ -52,13 +52,6 @@ public class ControllerTest {
 	}
 
 	@Test
-	public void shouldReturnStatusOk() throws Exception {
-		this.mockMvc.perform(get("/get-all-reservations")).andDo(print()).andExpect(status().isOk())
-				.andExpect(content().string(containsString("2022")));
-
-	}
-
-	@Test
 	public void testMakeReservation() throws Exception {
 
 		ReservatonRequest reservatonRequest = new ReservatonRequest();
