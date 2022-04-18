@@ -11,10 +11,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.codingchallenge.campsite.model.Reservation;
 import com.codingchallenge.campsite.repositories.ReservationRepository;
+import com.codingchallenge.campsite.requests.ModificationRequest;
 import com.codingchallenge.campsite.requests.ReservatonRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ch.qos.logback.core.net.ObjectWriter;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -35,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@AutoConfigureRestDocs(outputDir = "target/snippets")
 public class ControllerTest {
 
 	@Autowired
@@ -128,6 +126,54 @@ public class ControllerTest {
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
 	}
+	
+	@Test
+	public void testMakeReservationModifyReservation() throws Exception {
+		
+		ReservatonRequest reservatonRequest = new ReservatonRequest();
+		reservatonRequest.setArrival(LocalDate.now().plusDays(8).toString());
+		reservatonRequest.setDeparture(LocalDate.now().plusDays(9).toString());
+		reservatonRequest.setFullname("fullname");
+		reservatonRequest.setEmail("email4@mail.com");
+		
+		com.fasterxml.jackson.databind.ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		String jsonRequest = ow.writeValueAsString(reservatonRequest);
+		
+		String response = this.mockMvc
+				.perform(post("/make-reservation").content(jsonRequest).contentType(MediaType.APPLICATION_JSON)
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+
+		JSONObject json = (JSONObject) JSONParser.parseJSON(response);
+		String id = (String)json.get("id");
+		
+		String newArrival = LocalDate.now().plusDays(9).toString();
+		String newDeparture = LocalDate.now().plusDays(10).toString();
+
+		ModificationRequest modificationRequest = new ModificationRequest();
+		
+		modificationRequest.setReservationId(id);
+		modificationRequest.setNewArrival(newArrival);
+		modificationRequest.setNewDeparture(newDeparture);
+		
+		String jsonModRequest = ow.writeValueAsString(modificationRequest);
+		
+		// Cancel previous booking to allow booking for the same date slot
+		this.mockMvc.perform(post("/modify-reservation/").content(jsonModRequest).contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(content().string(containsString(newArrival)))
+				.andExpect(content().string(containsString(newDeparture)));
+
+
+
+	}
+	
+	/**
+	 * 
+	 * Multi-threaded test to make sure that a booking slot can't be booked more than one time
+	 * 
+	 * @throws Exception
+	 */
 
 	@Test
 	public void testConcurrencyReservation() throws Exception {
@@ -146,13 +192,14 @@ public class ControllerTest {
 		com.fasterxml.jackson.databind.ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String reservRequest = ow.writeValueAsString(reservatonRequest);
 
-		ExecutorService executor = Executors.newFixedThreadPool(5);
-		for (int i = 0; i < 100; i++) {
+		ExecutorService executor = Executors.newFixedThreadPool(50);
+		for (int i = 0; i < 50; i++) {
 			Runnable worker = () -> {
 				try {
 					this.mockMvc
 							.perform(post("/make-reservation").content(reservRequest)
 									.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON));
+
 					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

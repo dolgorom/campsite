@@ -25,4 +25,18 @@ include::{snippets}/testMakeReservation/http-request.adoc[]
 .response
 include::{snippets}/testMakeReservation/http-response.adoc[]
 
+== POST modify reservation
+.request
+include::{snippets}/testModifyReservation/http-request.adoc[]
+
+.response
+include::{snippets}/testModifyReservation/http-response.adoc[]
+
+
+== GET cancel reservation
+.request
+include::{snippets}/testCancelReservation/http-request.adoc[]
+
+.response
+include::{snippets}/testCancelReservation/http-response.adoc[]
 

@@ -39,12 +39,6 @@ public class Controller {
 	private ReservationManager reservationManager;
 	   
 	
-	@GetMapping("/get-all-reservations")
-    public Iterable<Reservation> findAllReservations() {
-		return reservationsRepo.findAll();
-    }
-	
-
 	
 	@GetMapping("/available-slots")
     public Set<LocalDate> findAllAvailableSlots() {
@@ -99,7 +93,7 @@ public class Controller {
 
 		log.info("makeReservation called {} ", reservationRequest);
 
-		if (!reservationRequest.isComplete()) {
+		if (!reservationRequest.validate()) {
 			throw new IncompleteRequestException(
 					"Request must provide arrival date, departure date, email and full name of the person");
 		}
@@ -132,7 +126,7 @@ public class Controller {
 
 		log.info("makeReservation called {} ", modificationRequest);
 
-		if (!modificationRequest.isComplete()) {
+		if (!modificationRequest.validate()) {
 			throw new IncompleteRequestException(
 					"Request must provide reservation id and new  arrival date and departure date. Ex. {\"reservationId\":\"2aaa2c46-89bd-4ce8-8a5c-53dd8a90e678\",\"newArrival\":\"2022-04-17\",\"newDeparture\":\"2022-04-18\"}");
 		}
@@ -157,7 +151,7 @@ public class Controller {
 		reservationToBeUpdated.setDeparture(modifiedReservation.getDeparture());
 
 		
-		return new ResponseEntity<Reservation>( reservationManager.createReservation(reservationToBeUpdated), HttpStatus.CREATED);
+		return new ResponseEntity<Reservation>( reservationManager.createReservation(reservationToBeUpdated), HttpStatus.OK);
 	}
 	
 	

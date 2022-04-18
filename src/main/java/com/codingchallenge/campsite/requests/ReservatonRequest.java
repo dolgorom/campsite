@@ -52,7 +52,7 @@ public class ReservatonRequest {
 	}
 	
 	
-	public boolean isComplete() {
+	public boolean validate() {
 		
 		return (arrival != null && departure != null && fullname != null && email != null);
 				

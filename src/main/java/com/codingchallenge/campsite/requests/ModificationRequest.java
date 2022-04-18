@@ -3,10 +3,8 @@ package com.codingchallenge.campsite.requests;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.codingchallenge.campsite.model.Person;
 import com.codingchallenge.campsite.model.Reservation;
 import com.codingchallenge.campsite.rest.exceptions.IllegalRequestException;
 
@@ -42,7 +40,8 @@ public class ModificationRequest {
 		this.newDeparture = newDeparture;
 	}
 
-	public boolean isComplete() {
+	
+	public boolean validate() {
 
 		return (reservationId != null && newArrival != null && newDeparture != null);
 
